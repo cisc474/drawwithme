@@ -1,0 +1,22 @@
+<!doctype html>
+<html ng-app="drawwithme">
+  <head lang="en">
+    <title>Drawwithme</title>
+
+    <!-- Import needed client side styling and libraries 
+    NOTE: Using non minified versions of the javascript libraries for debugging 
+    purposes. Before going into production switch to minified versions. -->
+    <script type="text/javascript" src="/components/jquery/dist/jquery.js"></script>
+    <script type="text/javascript" src="/components/angular/angular.js"></script>
+    <script type="text/javascript" src="/components/angular-route/angular-route.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/components/bootstrap/dist/css/bootstrap.min.css">
+  </head>
+
+  <!-- Tell angular where to put things -->
+  <body ng-view>
+  </body>
+
+  <!-- Import the angular application after everything has loaded-->
+  <script type="text/javascript" src="/js/drawwithme.js"></script>
+</html>
