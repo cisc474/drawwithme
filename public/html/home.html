@@ -7,7 +7,7 @@
   <form ng-submit="joinGame()">
     <div class="form-group">
       <label for="nameInput">Desired Username:</label>
-      <input type="text" class="form-control" id="nameInput" placholder="username">
+      <input type="text" class="form-control" id="nameInput" placholder="username" ng-model="usernameInput">
     </div>
     <button type="submit" class="btn btn-primary" ng-disable="!text">Join Game</button>
   </form>

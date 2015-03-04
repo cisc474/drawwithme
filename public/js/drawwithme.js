@@ -17,21 +17,38 @@ app.config(["$routeProvider", "$locationProvider",
 
 // Connect to the server using socket.io
 var socket = io.connect();
+var gameID = "";
+var username = "";
 
 // This controller controls the Home screen
-app.controller("HomeController", ["$scope", 
-  function($scope) {
+app.controller("HomeController", ["$scope", "$location",
+  function($scope, $location) {
+    username = "";
+
+    socket.emit("leavegame", gameID);
 
     // Function called when a player wishes to join a game
     $scope.joinGame = function() {
-      console.log("Joining a game...");
+      username = $scope.usernameInput;
+      console.log("Joining a game as " + username);
+      socket.emit("lookingForGame", username);
     };
+
+    socket.on("foundGame", function(gameID) {
+      var path = "/game/" + gameID;
+      //console.log(path)
+      $location.path(path);
+      $scope.$apply();
+    });
   }
 ]);
 
 // Theis controller controls the game view
 app.controller("GameController", ["$scope", "$routeParams", 
   function($scope, $routeParams) {
+    // TODO: upon load check to see if they have a name and if they are in the 
+    // correct room
+
     // get the gameID and tell socket that you joined it
     gameID = $routeParams.id;
 

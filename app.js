@@ -49,6 +49,13 @@ io.sockets.on("connection", function(socket) {
     //console.log("sending message..."  + data.game);
     io.sockets.in(data.game).emit("message", data);
   });
+
+  // What to do when searching for a new game
+  socket.on("lookingForGame", function(username) {
+    console.log("looking for a game...");
+    // TODO: Check games 
+    socket.emit("foundGame", "1");
+  });
 });
 
 // Start the server (taken from Andy which is taken from Cloud9)
