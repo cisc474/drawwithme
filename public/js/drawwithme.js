@@ -4,8 +4,6 @@ var app = angular.module("drawwithme", ["ngRoute"]);
 // Setup the routes used for the singlepage app
 app.config(["$routeProvider", "$locationProvider", 
   function($routeProvider, $locationProvider) {
-
-    // The default page to be shown when a client connects
     $routeProvider.when("/game/:id", {
       templateUrl: "/html/game.html",
       controller: "GameController"
@@ -32,13 +30,31 @@ app.controller("HomeController", ["$scope",
 ]);
 
 // Theis controller controls the game view
-app.controller("GameController", ["$scope", "$routeParams" 
+app.controller("GameController", ["$scope", "$routeParams", 
   function($scope, $routeParams) {
+    // get the gameID and tell socket that you joined it
+    gameID = $routeParams.id;
+
+    socket.emit("joingame", gameID);
+
+    // initialize variables
+    name = "dummy";
+    $scope.text = "";
     $scope.messages = [];
+
+    // upon receiving a message
+    socket.on("message", function(message) {
+      //console.log("received message");
+      $scope.messages.push(message);
+      $scope.$apply();
+    });
 
     // What to do when sending a message
     $scope.sendMessage = function() {
+      message = $scope.text;
       $scope.text = "";
+      //console.log("sending message... " + message +", " + name + ", " + gameID); 
+      socket.emit("sendMessage", {name: name, text: message, game: gameID});
     };
   }
 ]);

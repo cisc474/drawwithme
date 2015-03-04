@@ -31,6 +31,24 @@ router.get("/components/*", function(req, res) {
 // each client
 io.sockets.on("connection", function(socket) {
   console.log("New client from " + colors.green(socket.request.connection.remoteAddress));
+
+  // See when someone joins a new game add them to the socket "room"
+  socket.on("joingame", function(gameID) {
+    //console.log("joined game " + gameID);
+    socket.join(gameID);
+  });
+
+  // When someone leave remove them from the socket "room"
+  socket.on("leavegame", function(gameID) {
+    //console.log("left game " + gameID);
+    socket.leave(gameID);
+  });
+
+  // When someone sends a message emit it to the correct game
+  socket.on("sendMessage", function(data) {
+    //console.log("sending message..."  + data.game);
+    io.sockets.in(data.game).emit("message", data);
+  });
 });
 
 // Start the server (taken from Andy which is taken from Cloud9)
