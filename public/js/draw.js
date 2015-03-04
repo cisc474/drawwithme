@@ -1,4 +1,3 @@
-
 var canvas, stage;
 var drawingCanvas;
 var oldPt;
@@ -8,8 +7,10 @@ var color;
 var stroke;
 var colors;
 var index;
+var gameID;
 
-var startDraw = function() {
+var startDraw = function(game) {
+  gameID = game;
   console.log("Hello from draw!");
   canvas = $("#gameCanvas").get(0);
   index = 0;
@@ -49,7 +50,9 @@ var handleMouseMove = function(event) {
   var midPt = new createjs.Point(oldPt.x + stage.mouseX >> 1, oldPt.y + stage.mouseY >> 1);
   drawingCanvas.graphics.clear().setStrokeStyle(stroke, 'round', 'round').beginStroke(color).moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
 
-  var draw_packet = {color: color, stroke: stroke, midPt: midPt, oldPt: oldPt, oldMidPt: oldMidPt, game: "1"}
+  // angular.element($(".container")).scope().emitMove(color, stroke, midPt, oldPt, oldMidPt);
+  // console.log("after emit move")
+  var draw_packet = {color: color, stroke: stroke, midPt: midPt, oldPt: oldPt, oldMidPt: oldMidPt, game: gameID};
   socket.emit("moved mouse", draw_packet);
 
   oldPt.x = stage.mouseX;

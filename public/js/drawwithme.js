@@ -18,6 +18,7 @@ app.config(["$routeProvider", "$locationProvider",
 // Connect to the server using socket.io
 var socket = io.connect();
 
+// User Props module to be able to pass aroudn user info 
 app.service("userProps", function() {
   var user = { gameID: "", name: "" };
   return {
@@ -48,6 +49,7 @@ app.controller("HomeController", ["$scope", "$location", "userProps",
 
     socket.on("foundGame", function(gameID) {
       var path = "/game/" + gameID;
+      userProps.setGameID(gameID);
       //console.log(path);
       $location.path(path);
       $scope.$apply();
@@ -56,9 +58,18 @@ app.controller("HomeController", ["$scope", "$location", "userProps",
 ]);
 
 // This controller controls the game view
-app.controller("GameController", ["$scope", "$routeParams", "userProps", 
-  function($scope, $routeParams, userProps) {
-    startDraw();
+app.controller("GameController", ["$scope", "$routeParams", "$location", "userProps", 
+  function($scope, $routeParams, $location, userProps) {
+    var path = "/home";
+    socket.emit("check", userProps.getUser())
+    
+    if(userProps.getUser().gameID == "") {
+      $location.path(path);
+      //$scope.$apply();
+      return;
+    } 
+    console.log(userProps.getUser());
+    startDraw(userProps.getUser().gameID);
     removeDrawer();
     if(userProps.getUser().name == "jeremy") {
       makeDrawer();

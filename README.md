@@ -8,3 +8,14 @@ This app will use a NodeJS server that is running express and socket.io to liste
 ### Installation
 
 To run this application clone the repo to the machine you wish to run it on and then run `npm install` followed by `bower install` (install bower using `npm install -g bower`) to install all necessary NodeJS libraries and static dependencies. Then simply run `node app.js` to start the server.
+
+* * * 
+
+### TO DO:
+* timer
+* switch who's drawing
+* prevent people from joining rooms w/o going through lobby DONE
+* beautify chat
+* check for right word in chat (exact-ish)
+* game joining algorithm on backend
+* show word to draw to user

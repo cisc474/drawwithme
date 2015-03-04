@@ -58,7 +58,7 @@ io.sockets.on("connection", function(socket) {
   });
 
   socket.on("moved mouse", function(draw_packet) {
-    console.log("DRAWING!");
+    //console.log("DRAWING!");
     console.log(draw_packet);
     io.sockets.in(draw_packet.game).emit("update", draw_packet);
   });
