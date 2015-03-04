@@ -7,4 +7,4 @@ This app will use a NodeJS server that is running express and socket.io to liste
 
 ### Installation
 
-To run this application clone the repo to the machine you wish to run it on and then run `npm install` followed by `bower install` to install all necessary NodeJS libraries and static dependencies.
+To run this application clone the repo to the machine you wish to run it on and then run `npm install` followed by `bower install` (install bower using `npm install -g bower`) to install all necessary NodeJS libraries and static dependencies. Then simply run `node app.js` to start the server.
