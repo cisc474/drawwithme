@@ -14,8 +14,12 @@ app.config(["$routeProvider", "$locationProvider",
     });
 }]);
 
+// Connect to the server using socket.io
+var socket = io.connect();
+
+// This controller controls the Home screen
 app.controller("HomeController", ["$scope", 
   function($scope) {
-    
+
   }
 ]);
