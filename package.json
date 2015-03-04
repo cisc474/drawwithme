@@ -1,0 +1,13 @@
+{
+  "name": "drawwithme",
+  "version": "0.0.1",
+  "description": "Knockoff of DrawSomelthing using purely javascript and HTML5",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cisc474/drawwithme.git"
+  },
+  "dependencies": {
+    "express": "4.x",
+    "socket.io": "1.x"
+  }
+}
