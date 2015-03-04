@@ -17,45 +17,57 @@ app.config(["$routeProvider", "$locationProvider",
 
 // Connect to the server using socket.io
 var socket = io.connect();
-var gameID = "";
-var username = "";
+
+app.service("userProps", function() {
+  var user = { gameID: "", name: "" };
+  return {
+    getUser: function() {
+      return user;
+    },
+    setUsername: function(value) {
+      user.name = value;
+    },
+    setGameID: function(value) {
+      user.gameID = value;
+    }
+  };
+});
 
 // This controller controls the Home screen
-app.controller("HomeController", ["$scope", "$location",
-  function($scope, $location) {
-    username = "";
+app.controller("HomeController", ["$scope", "$location", "userProps",
+  function($scope, $location, userProps) {
 
-    socket.emit("leavegame", gameID);
+    socket.emit("leavegame", userProps.getUser().gameID);
 
     // Function called when a player wishes to join a game
     $scope.joinGame = function() {
-      username = $scope.usernameInput;
-      console.log("Joining a game as " + username);
-      socket.emit("lookingForGame", username);
+      userProps.setUsername($scope.usernameInput);
+      console.log("Joining a game as " + userProps.getUser().name);
+      socket.emit("lookingForGame", userProps.getUser().name);
     };
 
     socket.on("foundGame", function(gameID) {
       var path = "/game/" + gameID;
-      //console.log(path)
+      console.log(path);
       $location.path(path);
       $scope.$apply();
     });
   }
 ]);
 
-// Theis controller controls the game view
-app.controller("GameController", ["$scope", "$routeParams", 
-  function($scope, $routeParams) {
+// This controller controls the game view
+app.controller("GameController", ["$scope", "$routeParams", "userProps", 
+  function($scope, $routeParams, userProps) {
+    console.log(userProps.getUser().name);
     // TODO: upon load check to see if they have a name and if they are in the 
     // correct room
 
     // get the gameID and tell socket that you joined it
-    gameID = $routeParams.id;
+    userProps.getUser().gameID = $routeParams.id;
 
-    socket.emit("joingame", gameID);
+    socket.emit("joingame", userProps.getUser().gameID);
 
     // initialize variables
-    name = "dummy";
     $scope.text = "";
     $scope.messages = [];
 
@@ -70,8 +82,8 @@ app.controller("GameController", ["$scope", "$routeParams",
     $scope.sendMessage = function() {
       message = $scope.text;
       $scope.text = "";
-      //console.log("sending message... " + message +", " + name + ", " + gameID); 
-      socket.emit("sendMessage", {name: name, text: message, game: gameID});
+      //console.log("sending message... " + message +", " + userProps.getUser().name + ", " + userProps.getUser().gameID); 
+      socket.emit("sendMessage", {name: userProps.getUser().name, text: message, game: userProps.getUser().gameID});
     };
   }
 ]);
