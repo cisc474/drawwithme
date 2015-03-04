@@ -42,13 +42,13 @@ app.controller("HomeController", ["$scope", "$location", "userProps",
     // Function called when a player wishes to join a game
     $scope.joinGame = function() {
       userProps.setUsername($scope.usernameInput);
-      console.log("Joining a game as " + userProps.getUser().name);
+      //console.log("Joining a game as " + userProps.getUser().name);
       socket.emit("lookingForGame", userProps.getUser().name);
     };
 
     socket.on("foundGame", function(gameID) {
       var path = "/game/" + gameID;
-      console.log(path);
+      //console.log(path);
       $location.path(path);
       $scope.$apply();
     });
@@ -58,7 +58,7 @@ app.controller("HomeController", ["$scope", "$location", "userProps",
 // This controller controls the game view
 app.controller("GameController", ["$scope", "$routeParams", "userProps", 
   function($scope, $routeParams, userProps) {
-    console.log(userProps.getUser().name);
+    startDraw();
     // TODO: upon load check to see if they have a name and if they are in the 
     // correct room
 

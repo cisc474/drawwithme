@@ -52,7 +52,7 @@ io.sockets.on("connection", function(socket) {
 
   // What to do when searching for a new game
   socket.on("lookingForGame", function(username) {
-    console.log("looking for a game...");
+    //console.log("looking for a game...");
     // TODO: Check games 
     socket.emit("foundGame", "1");
   });
