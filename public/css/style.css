@@ -1,0 +1,9 @@
+canvas {
+  background: white;
+}
+
+.center {
+  text-align: center;
+  display: block;
+  margin: auto;
+}

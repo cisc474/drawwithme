@@ -1,11 +1,14 @@
 <div class="container">
   <h1>Drawwithme <small>by Jeremy, Kyle, and Ken</small></h1>
   <hr>
-  <form>
+
+  <!-- Let the person input their username and then upon submitting and hitting 
+  join game call the joinGame() function in the angular app -->
+  <form ng-submit="joinGame()">
     <div class="form-group">
       <label for="nameInput">Desired Username:</label>
       <input type="text" class="form-control" id="nameInput" placholder="username">
     </div>
-    <button type="submit" class="btn btn-primary">Join Game</button>
+    <button type="submit" class="btn btn-primary" ng-disable="!text">Join Game</button>
   </form>
 </div>
