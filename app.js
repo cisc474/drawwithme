@@ -56,6 +56,12 @@ io.sockets.on("connection", function(socket) {
     // TODO: Check games 
     socket.emit("foundGame", "1");
   });
+
+  socket.on("moved mouse", function(draw_packet) {
+    console.log("DRAWING!");
+    console.log(draw_packet);
+    io.sockets.in(draw_packet.game).emit("update", draw_packet);
+  });
 });
 
 // Start the server (taken from Andy which is taken from Cloud9)

@@ -59,6 +59,12 @@ app.controller("HomeController", ["$scope", "$location", "userProps",
 app.controller("GameController", ["$scope", "$routeParams", "userProps", 
   function($scope, $routeParams, userProps) {
     startDraw();
+    removeDrawer();
+    if(userProps.getUser().name == "jeremy") {
+      makeDrawer();
+    }
+
+
     // TODO: upon load check to see if they have a name and if they are in the 
     // correct room
 
@@ -76,6 +82,16 @@ app.controller("GameController", ["$scope", "$routeParams", "userProps",
       //console.log("received message");
       $scope.messages.push(message);
       $scope.$apply();
+    });
+
+    socket.on("update", function(draw_packet) {
+      if (stage.contains(title)) {
+        stage.clear();
+        stage.removeChild(title);
+      }
+      console.log("update received");
+      drawingCanvas.graphics.clear().setStrokeStyle(draw_packet.stroke, 'round', 'round').beginStroke(draw_packet.color).moveTo(draw_packet.midPt.x, draw_packet.midPt.y).curveTo(draw_packet.oldPt.x, draw_packet.oldPt.y, draw_packet.oldMidPt.x, draw_packet.oldMidPt.y);
+      stage.update();
     });
 
     // What to do when sending a message

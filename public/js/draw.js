@@ -13,10 +13,9 @@ var startDraw = function() {
   console.log("Hello from draw!");
   canvas = $("#gameCanvas").get(0);
   index = 0;
-  colors = ["#828b20", "#b0ac31", "#cbc53d", "#fad779", "#f9e4ad", "#faf2db", "#563512", "#9b4a0b", "#d36600", "#fe8a00", "#f9a71f"];
+  colors = ["#000000"];
   //check to see if we are running in a browser with touch support
   stage = new createjs.Stage(canvas);
-  console.log(canvas);
   stage.autoClear = false;
   stage.enableDOMEvents(true);
   createjs.Touch.enable(stage);
@@ -30,7 +29,6 @@ var startDraw = function() {
   stage.addChild(title);
   stage.addChild(drawingCanvas);
   stage.update();
-  console.log("Hello again");
 }
 
 var handleMouseDown = function(event) {
@@ -50,6 +48,10 @@ var handleMouseMove = function(event) {
   if (!event.primary) { return; }
   var midPt = new createjs.Point(oldPt.x + stage.mouseX >> 1, oldPt.y + stage.mouseY >> 1);
   drawingCanvas.graphics.clear().setStrokeStyle(stroke, 'round', 'round').beginStroke(color).moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
+
+  var draw_packet = {color: color, stroke: stroke, midPt: midPt, oldPt: oldPt, oldMidPt: oldMidPt, game: "1"}
+  socket.emit("moved mouse", draw_packet);
+
   oldPt.x = stage.mouseX;
   oldPt.y = stage.mouseY;
   oldMidPt.x = midPt.x;
@@ -60,4 +62,14 @@ var handleMouseMove = function(event) {
 var handleMouseUp = function(event) {
   if (!event.primary) { return; }
   stage.removeEventListener("stagemousemove", handleMouseMove);
+}
+
+var makeDrawer = function() {
+  stage.addEventListener("stagemousedown", handleMouseDown);
+  stage.addEventListener("stagemouseup", handleMouseUp);
+}
+
+var removeDrawer = function() {
+  stage.removeEventListener("stagemousedown", handleMouseDown);
+  stage.removeEventListener("stagemouseup", handleMouseUp);
 }
