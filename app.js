@@ -10,6 +10,35 @@ var router = express();
     server = http.createServer(router);
     io = socketio.listen(server);
 
+var MAX_PLAYERS = 6;
+var games = [];
+
+function createGame(){
+  console.log("Called createGame()");
+  this.gameID = games.length;
+  this.numPlayers = 0;
+  games[games.length] = this;
+  console.log("Created Game " + gameID);
+}
+
+function addPlayer(socket){
+  for (var i = 0; i < games.length; i++){
+    if (games[i].numPlayers < MAX_PLAYERS){
+      socket.emit("foundGame", i);
+      games[i].numPlayers++;
+      return;
+    }
+  }
+  createGame();
+  socket.emit("foundGame", games.length - 1);
+  console.log("Found created game");
+  games[i].numPlayers++;
+}
+
+function checkGame(gameID){
+  io.sockets.in(gameID).emit("ping");
+}
+
 // Set the static file path to the public directory
 router.use(express.static(path.resolve(__dirname, "public")));
 
@@ -38,6 +67,10 @@ io.sockets.on("connection", function(socket) {
     socket.join(gameID);
   });
 
+  socket.on("pingrec", function(gameID){
+    console.log("User pinged from" + gameID);
+  });
+
   // When someone leave remove them from the socket "room"
   socket.on("leavegame", function(gameID) {
     //console.log("left game " + gameID);
@@ -48,13 +81,14 @@ io.sockets.on("connection", function(socket) {
   socket.on("sendMessage", function(data) {
     //console.log("sending message..."  + data.game);
     io.sockets.in(data.game).emit("message", data);
+    checkGame(0);
   });
 
   // What to do when searching for a new game
   socket.on("lookingForGame", function(username) {
     //console.log("looking for a game...");
     // TODO: Check games 
-    socket.emit("foundGame", "1");
+    addPlayer(socket);
   });
 
   socket.on("moved mouse", function(draw_packet) {

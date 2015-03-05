@@ -50,7 +50,7 @@ app.controller("HomeController", ["$scope", "$location", "userProps",
     socket.on("foundGame", function(gameID) {
       var path = "/game/" + gameID;
       userProps.setGameID(gameID);
-      //console.log(path);
+      console.log(gameID);
       $location.path(path);
       $scope.$apply();
     });
@@ -61,9 +61,11 @@ app.controller("HomeController", ["$scope", "$location", "userProps",
 app.controller("GameController", ["$scope", "$routeParams", "$location", "userProps", 
   function($scope, $routeParams, $location, userProps) {
     var path = "/home";
-    socket.emit("check", userProps.getUser())
+    socket.emit("check", userProps.getUser());
     
-    if(userProps.getUser().gameID == "") {
+    if(userProps.getUser().gameID.toString() == "") {
+      console.log("Nice Try");
+      console.log(userProps.getUser().gameID);
       $location.path(path);
       //$scope.$apply();
       return;
@@ -103,6 +105,11 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
       console.log("update received");
       drawingCanvas.graphics.clear().setStrokeStyle(draw_packet.stroke, 'round', 'round').beginStroke(draw_packet.color).moveTo(draw_packet.midPt.x, draw_packet.midPt.y).curveTo(draw_packet.oldPt.x, draw_packet.oldPt.y, draw_packet.oldMidPt.x, draw_packet.oldMidPt.y);
       stage.update();
+    });
+
+    socket.on("ping", function(){
+      console.log("Ping received");
+      socket.emit("pingrec", userProps.getUser().gameID);
     });
 
     // What to do when sending a message
