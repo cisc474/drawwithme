@@ -20,7 +20,7 @@ var socket = io.connect();
 
 // User Props module to be able to pass aroudn user info 
 app.service("userProps", function() {
-  var user = { gameID: "", name: "", userID: 0 };
+  var user = { gameID: "", name: "", userID: -1 };
   return {
     getUser: function() {
       return user;
@@ -41,7 +41,7 @@ app.service("userProps", function() {
 app.controller("HomeController", ["$scope", "$location", "userProps",
   function($scope, $location, userProps) {
 
-    socket.emit("leavegame", userProps.getUser().gameID);
+    //socket.emit("leavegame", userProps.getUser().gameID);
 
     // Function called when a player wishes to join a game
     $scope.joinGame = function() {
@@ -81,8 +81,6 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
     if(userProps.getUser().name == "jeremy") {
       makeDrawer();
     }
-
-
     // TODO: upon load check to see if they have a name and if they are in the 
     // correct room
 
@@ -102,6 +100,11 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
       $scope.$apply();
     });
 
+    socket.on("newID", function(newID){
+      userProps.getUser().userID = newID;
+      console.log("Assigned new ID of " + newID);
+    });
+
     socket.on("update", function(draw_packet) {
       if (stage.contains(title)) {
         stage.clear();
@@ -113,7 +116,7 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
     });
 
     socket.on("ping", function(){
-      console.log("Ping received");
+      console.log("Ping received from server");
       socket.emit("pingrec", {gameID: userProps.getUser().gameID, userID: userProps.getUser().userID});
     });
 

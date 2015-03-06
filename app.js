@@ -12,49 +12,95 @@ var router = express();
 
 var MAX_PLAYERS = 6;
 var games = [];
+var listening = false; // Are we listening for pings right now?
 
 var TIME_DELAY = 3000; // Time delay when pinging, in ms
 
 // Adds a game to the list (array) of games. 
-function createGame(){
+function Game(){
   this.gameID = games.length;
   this.numPlayers = 0;
   this.players = [];
-  games[games.length] = this;
-  console.log("Created Game " + gameID);
+  console.log("Created Game " + this.gameID);
+}
+
+// Shortens array of users
+function shortenArray(users){
+  var numRealValues = 0;
+  var returnArray = [];
+  for (var i = 0; i < users.length; i++){
+    if (users[i].inGame){
+      returnArray[numRealValues] = users[i];
+      returnArray[numRealValues].userID = numRealValues;
+      numRealValues++;
+    }
+    else console.log(i + "isn't here anymore");
+  }
+  console.log(returnArray.length + " real users left.");
+  return returnArray;
+}
+
+function Player(socket, username){
+  this.username = username;
+  this.userSocketID = socket.id; // Need to keep track of each users socket
+  this.inGame = true;
+  console.log("Users created with socketID " + this.userSocketID);
 }
 
 // Creates and adds a player to the first open game in the list of games.
+// Stores the user's socket with the user
 function addPlayer(socket, username){
-  this.username = username;
+  //console.log(this);
+  var player = new Player(socket, username);
   for (var i = 0; i < games.length; i++){
     if (games[i].numPlayers < MAX_PLAYERS){
-      this.userID = games[i].numPlayers;
-      games[i].players[players.length] = this;
+      player.userID = games[i].numPlayers;
+      //console.log(games[i].players.length + " players here before I joined");
+      // for (var j = 0; j < games[i].players.length; j++){
+      //   console.log("User with ID " + games[i].players[j].userID + " Added with socketID " + games[i].players[j].userSocketID);
+      // }
+      games[i].players[games[i].players.length] = player;
+      for (var j = 0; j < games[i].players.length; j++){
+        console.log("User with ID " + games[i].players[j].userID + " Added with socketID " + games[i].players[j].userSocketID);
+      }
       games[i].numPlayers++;
-      socket.emit("foundGame", {gameID: i, userID: this.userID});
+      //console.log(games[i].players[players.length - 1]);
+      socket.emit("foundGame", {gameID: i, userID: player.userID});
       return;
     }
   }
-  createGame();
-  this.userID = 0;
-  console.log(this.userID + " Server");
-  socket.emit("foundGame", {gameID: games.length - 1, userID: this.userID});
-  games[i].numPlayers++;
+  var game = new Game();
+  player.userID = 0;
+  game.players[0] = player;
+  game.numPlayers++;
+  games[games.length] = game;
+  socket.emit("foundGame", {gameID: games.length - 1, userID: player.userID});
 }
 
 // checks the number of users in a game by pinging them and
-// waiting for responses
+// waiting for responses. Reorganizes users, keeping them in their
+// same order
 function checkGame(socket, gameID){
-  io.sockets.in(gameID).emit("ping");
-  var numUsers = 0;
-  socket.on("pingrec", function(gameID){
-    console.log("User pinged from" + gameID);
-    numUsers++;
-  });
+  var origUsers = games[gameID].players;
+  console.log("Orig Users is of length " + origUsers.length);
+  listening = true; // Listening now for pingrec events
+  for (var i = 0; i < origUsers.length; i++){
+    games[gameID].players[i].inGame = false; // They're not here until they say they are
+    console.log("Sending message to " + games[gameID].players[i].userSocketID);
+    io.to(games[gameID].players[i].userSocketID).emit("ping");
+  }
+  //io.sockets.in(gameID).emit("ping"); // Head count
+
   setTimeout(function() {
+    listening = false; // No longer listening
     console.log('Waited the 3 seconds');
-    games[gameID].numPlayers = numUsers;
+    games[gameID].numPlayers = games[gameID].players.length;
+    games[gameID].players = shortenArray(games[gameID].players);
+    //games[gameID].players = origUsers;
+    for (var i = 0; i < games[gameID].players.length; i++){
+      io.to(games[gameID].players[i].userSocketID).emit("newID", i);
+    }
+    // To do: Send back userID to users. 
     return;
   }, TIME_DELAY);
   // Anything you put down here won't wait until after the three seconds. 
@@ -88,10 +134,19 @@ io.sockets.on("connection", function(socket) {
     socket.join(gameID);
   });
 
+  socket.on("pingrec", function(userInfo){
+    //console.log("numUsers = " + numUsers);
+    console.log("User pinged with ID " + userInfo.userID);
+    if (listening && games[userInfo.gameID].players[userInfo.userID]){
+      games[userInfo.gameID].players[userInfo.userID].inGame = true; // We still have this user
+    }
+  });
+
   // When someone leave remove them from the socket "room"
   socket.on("leavegame", function(gameID) {
-    //console.log("left game " + gameID);
+    console.log("left game " + gameID);
     socket.leave(gameID);
+    games[gameID].players = shortenArray(games[gameID].players);
   });
 
   // When someone sends a message emit it to the correct game
@@ -116,7 +171,7 @@ io.sockets.on("connection", function(socket) {
 });
 
 // Start the server (taken from Andy which is taken from Cloud9)
-server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function() {
+server.listen(process.env.PORT || 3100, process.env.IP || "0.0.0.0", function() {
   var address = server.address();
   console.log("Server is now started on ", address.address + ":" + address.port);
 });
