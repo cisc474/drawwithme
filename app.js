@@ -13,30 +13,51 @@ var router = express();
 var MAX_PLAYERS = 6;
 var games = [];
 
+var TIME_DELAY = 3000; // Time delay when pinging, in ms
+
+// Adds a game to the list (array) of games. 
 function createGame(){
-  console.log("Called createGame()");
   this.gameID = games.length;
   this.numPlayers = 0;
+  this.players = [];
   games[games.length] = this;
   console.log("Created Game " + gameID);
 }
 
-function addPlayer(socket){
+// Creates and adds a player to the first open game in the list of games.
+function addPlayer(socket, username){
+  this.username = username;
   for (var i = 0; i < games.length; i++){
     if (games[i].numPlayers < MAX_PLAYERS){
-      socket.emit("foundGame", i);
+      this.userID = games[i].numPlayers;
+      games[i].players[players.length] = this;
       games[i].numPlayers++;
+      socket.emit("foundGame", {gameID: i, userID: this.userID});
       return;
     }
   }
   createGame();
-  socket.emit("foundGame", games.length - 1);
-  console.log("Found created game");
+  this.userID = 0;
+  console.log(this.userID + " Server");
+  socket.emit("foundGame", {gameID: games.length - 1, userID: this.userID});
   games[i].numPlayers++;
 }
 
-function checkGame(gameID){
+// checks the number of users in a game by pinging them and
+// waiting for responses
+function checkGame(socket, gameID){
   io.sockets.in(gameID).emit("ping");
+  var numUsers = 0;
+  socket.on("pingrec", function(gameID){
+    console.log("User pinged from" + gameID);
+    numUsers++;
+  });
+  setTimeout(function() {
+    console.log('Waited the 3 seconds');
+    games[gameID].numPlayers = numUsers;
+    return;
+  }, TIME_DELAY);
+  // Anything you put down here won't wait until after the three seconds. 
 }
 
 // Set the static file path to the public directory
@@ -67,10 +88,6 @@ io.sockets.on("connection", function(socket) {
     socket.join(gameID);
   });
 
-  socket.on("pingrec", function(gameID){
-    console.log("User pinged from" + gameID);
-  });
-
   // When someone leave remove them from the socket "room"
   socket.on("leavegame", function(gameID) {
     //console.log("left game " + gameID);
@@ -81,14 +98,14 @@ io.sockets.on("connection", function(socket) {
   socket.on("sendMessage", function(data) {
     //console.log("sending message..."  + data.game);
     io.sockets.in(data.game).emit("message", data);
-    checkGame(0);
+    checkGame(socket, 0);
   });
 
   // What to do when searching for a new game
   socket.on("lookingForGame", function(username) {
     //console.log("looking for a game...");
     // TODO: Check games 
-    addPlayer(socket);
+    addPlayer(socket, username);
   });
 
   socket.on("moved mouse", function(draw_packet) {

@@ -20,7 +20,7 @@ var socket = io.connect();
 
 // User Props module to be able to pass aroudn user info 
 app.service("userProps", function() {
-  var user = { gameID: "", name: "" };
+  var user = { gameID: "", name: "", userID: 0 };
   return {
     getUser: function() {
       return user;
@@ -30,6 +30,9 @@ app.service("userProps", function() {
     },
     setGameID: function(value) {
       user.gameID = value;
+    },
+    setUserID: function(value) {
+      user.userID = value;
     }
   };
 });
@@ -47,10 +50,12 @@ app.controller("HomeController", ["$scope", "$location", "userProps",
       socket.emit("lookingForGame", userProps.getUser().name);
     };
 
-    socket.on("foundGame", function(gameID) {
-      var path = "/game/" + gameID;
-      userProps.setGameID(gameID);
-      console.log(gameID);
+    socket.on("foundGame", function(userInfo) {
+      var path = "/game/" + userInfo.gameID;
+      userProps.setGameID(userInfo.gameID);
+      userProps.setUserID(userInfo.userID);
+      //console.log(userInfo.gameID);
+      console.log("Users position is " + userInfo.userID);
       $location.path(path);
       $scope.$apply();
     });
@@ -64,8 +69,8 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
     socket.emit("check", userProps.getUser());
     
     if(userProps.getUser().gameID.toString() == "") {
-      console.log("Nice Try");
-      console.log(userProps.getUser().gameID);
+      //console.log("Nice Try");
+      //console.log(userProps.getUser().gameID);
       $location.path(path);
       //$scope.$apply();
       return;
@@ -109,7 +114,7 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
 
     socket.on("ping", function(){
       console.log("Ping received");
-      socket.emit("pingrec", userProps.getUser().gameID);
+      socket.emit("pingrec", {gameID: userProps.getUser().gameID, userID: userProps.getUser().userID});
     });
 
     // What to do when sending a message
