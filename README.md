@@ -12,11 +12,11 @@ To run this application clone the repo to the machine you wish to run it on and 
 * * * 
 
 ### TO DO:
-* timer
+* timer DONEish
 * switch who's drawing
 * prevent people from joining rooms w/o going through lobby DONE
 * beautify chat
 * check for right word in chat (exact-ish)
 * game joining algorithm on backend DONEish
 * show word to draw to user
-* remove users from games
+* remove users from games DONE
