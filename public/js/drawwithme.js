@@ -113,6 +113,11 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
       console.log("Server ended timer");
     });
 
+    socket.on("word", function(word){
+      console.log("received word");
+      alert("Your word is " + word);
+    })
+
     socket.on("update", function(draw_packet) {
       if (stage.contains(title)) {
         stage.clear();
