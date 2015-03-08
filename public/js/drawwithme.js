@@ -105,6 +105,14 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
       console.log("Assigned new ID of " + newID);
     });
 
+    socket.on("startTimer", function(){
+      console.log("Server started timer");
+    });
+
+    socket.on("endTimer", function(){
+      console.log("Server ended timer");
+    });
+
     socket.on("update", function(draw_packet) {
       if (stage.contains(title)) {
         stage.clear();

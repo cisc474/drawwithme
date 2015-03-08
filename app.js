@@ -15,8 +15,9 @@ var games = [];
 var listening = false; // Are we listening for pings right now?
 
 var TIME_DELAY = 3000; // Time delay when pinging, in ms
+var TIMER = 15000; // Timer for a game, in ms
 
-// Adds a game to the list (array) of games. 
+// Creates a new game, adds to list of games
 function Game(){
   this.gameID = games.length;
   this.numPlayers = 0;
@@ -24,7 +25,7 @@ function Game(){
   console.log("Created Game " + this.gameID);
 }
 
-// Shortens array of users
+// Shortens array of users, keeping the same order
 function shortenArray(users){
   var numRealValues = 0;
   var returnArray = [];
@@ -40,6 +41,7 @@ function shortenArray(users){
   return returnArray;
 }
 
+// Creates a player
 function Player(socket, username){
   this.username = username;
   this.userSocketID = socket.id; // Need to keep track of each users socket
@@ -106,6 +108,27 @@ function checkGame(socket, gameID){
   // Anything you put down here won't wait until after the three seconds. 
 }
 
+/*
+Starts (end later ends) the game timer for a specific game.
+*/
+function startTimer(gameID){
+  var origUsers = games[gameID].players;
+  for (var i = 0; i < games[gameID].players.length; i++){
+    io.to(games[gameID].players[i].userSocketID).emit("startTimer");
+  }
+  console.log("Started Timer");
+  //io.sockets.in(gameID).emit("ping"); // Head count
+
+  setTimeout(function() {
+    console.log("Timer is over");
+    for (var i = 0; i < games[gameID].players.length; i++){
+      io.to(games[gameID].players[i].userSocketID).emit("endTimer");
+    }
+    return;
+  }, TIMER);
+  // Anything you put down here won't wait until after the three seconds. 
+}
+
 // Set the static file path to the public directory
 router.use(express.static(path.resolve(__dirname, "public")));
 
@@ -154,6 +177,7 @@ io.sockets.on("connection", function(socket) {
     //console.log("sending message..."  + data.game);
     io.sockets.in(data.game).emit("message", data);
     checkGame(socket, 0);
+    startTimer(0);
   });
 
   // What to do when searching for a new game
