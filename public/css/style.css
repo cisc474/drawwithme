@@ -7,3 +7,8 @@ canvas {
   display: block;
   margin: auto;
 }
+
+.messageTable {  
+    height: 100px !important;
+    overflow-y: scroll;
+}
