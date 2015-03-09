@@ -152,5 +152,15 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
       console.log("clicked clear screen");
       socket.emit("clearScreen", {name: userProps.getUser().name, game: userProps.getUser().gameID});
     };
+
+    // Code for clearing the screen
+    $scope.changeDrawColor = function(newColor) {
+      console.log("color changed to: " + newColor);
+      this.color = newColor;
+      //going to have to emit the new color for the server to push out, to prevent any user from changing the color (only drawer should change)
+      //also maybe have local user's color?
+      //socket.emit("clearScreen", {name: userProps.getUser().name, game: userProps.getUser().gameID});
+    };
+
   }
 ]);
