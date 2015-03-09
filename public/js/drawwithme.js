@@ -146,5 +146,11 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
       //console.log("sending message... " + message +", " + userProps.getUser().name + ", " + userProps.getUser().gameID); 
       socket.emit("sendMessage", {name: userProps.getUser().name, text: message, game: userProps.getUser().gameID});
     };
+
+    // Code for clearing the screen
+    $scope.clearScreen = function() {
+      console.log("clicked clear screen");
+      socket.emit("clearScreen", {name: userProps.getUser().name, game: userProps.getUser().gameID});
+    };
   }
 ]);
