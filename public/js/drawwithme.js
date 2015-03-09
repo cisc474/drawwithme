@@ -77,6 +77,7 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
     } 
     console.log(userProps.getUser());
     startDraw(userProps.getUser().gameID);
+    startTimer();
     removeDrawer();
     if(userProps.getUser().name == "jeremy") {
       makeDrawer();
@@ -98,6 +99,11 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
       //console.log("received message");
       $scope.messages.push(message);
       $scope.$apply();
+    });
+
+    socket.on("clearTheScreen", function(data){
+      console.log(data.name + " cleared the screen");
+      stage.clear();
     });
 
     socket.on("newID", function(newID){
