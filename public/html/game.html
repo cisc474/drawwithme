@@ -1,4 +1,7 @@
 <div class="container">
+  <div class="row center">
+    <span id="gameTimer">Timer</span>
+  </div>
   <!-- create the canvas upon which people will draw -->
   <div class="row center">
     <canvas id="gameCanvas" width="960" height="400"></canvas>
@@ -34,4 +37,12 @@
       </div>
     </form>
   </div>
+
+  <!-- Button to clear the screen -->
+  <div class="row">
+    <span class="btn-group pull-right">
+        <button class="btn btn-primary btn-lg" ng-click="clearScreen()">Clear screen</button>
+    </span>
+  </div>
+
 </div>

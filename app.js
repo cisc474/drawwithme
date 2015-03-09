@@ -215,6 +215,17 @@ io.sockets.on("connection", function(socket) {
     }
   });
 
+  //Clears the drawing screen in the game that called clear screen
+  socket.on("clearScreen", function(data){
+    console.log("in clear screen event");
+    io.sockets.in(data.game).emit("clearTheScreen", data);
+  });
+
+  //Called when dealing with timer stuff
+  socket.on("timer", function(data){
+    console.log("timer: " + data.timeRemaining);
+  });
+
   // What to do when searching for a new game
   socket.on("lookingForGame", function(username) {
     //console.log("looking for a game...");
