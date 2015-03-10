@@ -3,7 +3,7 @@ var drawingCanvas;
 var oldPt;
 var oldMidPt;
 var title;
-var color;
+var color = "#000000";
 var stroke;
 var colors;
 var index;
@@ -14,7 +14,7 @@ var startDraw = function(game) {
   console.log("Hello from draw!");
   canvas = $("#gameCanvas").get(0);
   index = 0;
-  colors = ["#000000"];
+//  colors = ["#000000"];
   //check to see if we are running in a browser with touch support
   stage = new createjs.Stage(canvas);
   stage.autoClear = false;
@@ -38,8 +38,8 @@ var handleMouseDown = function(event) {
     stage.clear();
     stage.removeChild(title);
   }
-  color = colors[(index++) % colors.length];
-  stroke = Math.random() * 30 + 10 | 0;
+//  color = colors[(index++) % colors.length];
+  stroke = 15;//Math.random() * 30 + 10 | 0;
   oldPt = new createjs.Point(stage.mouseX, stage.mouseY);
   oldMidPt = oldPt.clone();
   stage.addEventListener("stagemousemove", handleMouseMove);

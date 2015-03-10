@@ -223,7 +223,7 @@ io.sockets.on("connection", function(socket) {
 
   //Called when dealing with timer stuff
   socket.on("timer", function(data){
-    console.log("timer: " + data.timeRemaining);
+   // console.log("timer: " + data.timeRemaining);
   });
 
   // What to do when searching for a new game

@@ -22,7 +22,7 @@ var startTimer = function() {
     }
     timeRemaining = timeRemaining - 1000;
     socket.emit("timer", { timeRemaining: timeRemaining });
-    console.log("insideinterval");
+//    console.log("insideinterval");
 
     min = (timeRemaining/1000/60) << 0;
     sec = (timeRemaining/1000) % 60;

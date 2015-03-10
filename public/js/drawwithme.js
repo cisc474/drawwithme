@@ -15,6 +15,9 @@ app.config(["$routeProvider", "$locationProvider",
     });
 }]);
 
+var scroll = function() {
+	$("#chatMessageBox").animate({"scrollTop": $("#chatMessageBox")[0].scrollHeight}, "fast");
+}
 // Connect to the server using socket.io
 var socket = io.connect();
 
@@ -98,6 +101,7 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
     socket.on("message", function(message) {
       //console.log("received message");
       $scope.messages.push(message);
+      scroll();
       $scope.$apply();
     });
 
@@ -156,7 +160,7 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
     // Code for clearing the screen
     $scope.changeDrawColor = function(newColor) {
       console.log("color changed to: " + newColor);
-      this.color = newColor;
+      color = newColor;
       //going to have to emit the new color for the server to push out, to prevent any user from changing the color (only drawer should change)
       //also maybe have local user's color?
       //socket.emit("clearScreen", {name: userProps.getUser().name, game: userProps.getUser().gameID});
