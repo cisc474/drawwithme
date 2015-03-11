@@ -16,7 +16,7 @@ var listening = false; // Are we listening for pings right now?
 var wordListener = false;
 
 var TIME_DELAY = 3000; // Time delay when pinging, in ms
-var TIMER = 15000; // Timer for a game, in ms
+var TIMER = 30000; // Timer for a game, in ms
 var words = ["boat", "smile", "guitar", "table", "computer", "turkey", "tree", "lion", "flower"];
 
 // Creates a new game, adds to list of games
@@ -25,8 +25,10 @@ function Game(){
   this.numPlayers = 0;
   this.players = [];
   this.wordCounter = 0; // Could do random but I don't feel like it.
-  this.drawer = 0;
+  this.drawer = 0; // Picks the drawer for a game
   this.gameState = 0; // 0: inactive, 1: active, 2: Waiting for start? Something else idk
+  this.listening = false;
+  this.wordListener = false;
   console.log("Created Game " + this.gameID);
 }
 
@@ -51,6 +53,7 @@ function Player(socket, username){
   this.username = username;
   this.userSocketID = socket.id; // Need to keep track of each users socket
   this.inGame = true;
+  this.isDrawer = false;
   console.log("Users created with socketID " + this.userSocketID);
 }
 
@@ -60,18 +63,14 @@ function addPlayer(socket, username){
   //console.log(this);
   var player = new Player(socket, username);
   for (var i = 0; i < games.length; i++){
+    checkGame(i);
     if (games[i].numPlayers < MAX_PLAYERS){
       player.userID = games[i].numPlayers;
-      //console.log(games[i].players.length + " players here before I joined");
-      // for (var j = 0; j < games[i].players.length; j++){
-      //   console.log("User with ID " + games[i].players[j].userID + " Added with socketID " + games[i].players[j].userSocketID);
-      // }
       games[i].players[games[i].players.length] = player;
       for (var j = 0; j < games[i].players.length; j++){
         console.log("User with ID " + games[i].players[j].userID + " Added with socketID " + games[i].players[j].userSocketID);
       }
       games[i].numPlayers++;
-      //console.log(games[i].players[players.length - 1]);
       var word = words[player.wordCounter];
       socket.emit("foundGame", {gameID: i, userID: player.userID});
       return;
@@ -79,20 +78,24 @@ function addPlayer(socket, username){
   }
   var game = new Game();
   player.userID = 0;
+  player.isDrawer = true;
   game.players[0] = player;
   game.numPlayers++;
   games[games.length] = game;
   var word = words[player.wordCounter];
   socket.emit("foundGame", {gameID: games.length - 1, userID: player.userID});
+  setTimeout(function() {
+    socket.emit("makeDrawer");
+  }, TIME_DELAY);
 }
 
 // checks the number of users in a game by pinging them and
 // waiting for responses. Reorganizes users, keeping them in their
 // same order
-function checkGame(socket, gameID){
+function checkGame(gameID){
   var origUsers = games[gameID].players;
   console.log("Orig Users is of length " + origUsers.length);
-  listening = true; // Listening now for pingrec events
+  games[gameID].listening = true; // Listening now for pingrec events
   for (var i = 0; i < origUsers.length; i++){
     games[gameID].players[i].inGame = false; // They're not here until they say they are
     console.log("Sending message to " + games[gameID].players[i].userSocketID);
@@ -101,13 +104,19 @@ function checkGame(socket, gameID){
   //io.sockets.in(gameID).emit("ping"); // Head count
 
   setTimeout(function() {
-    listening = false; // No longer listening
+    games[gameID].listening = false; // No longer listening
     console.log('Waited the 3 seconds');
     games[gameID].numPlayers = games[gameID].players.length;
     games[gameID].players = shortenArray(games[gameID].players);
     //games[gameID].players = origUsers;
     for (var i = 0; i < games[gameID].players.length; i++){
       io.to(games[gameID].players[i].userSocketID).emit("newID", i);
+      if (i == games[gameID].drawer % games[gameID].players.length){
+        io.to(games[gameID].players[i].userSocketID).emit("makeDrawer");
+      }
+      else {
+          io.to(games[gameID].players[i].userSocketID).emit("removeDrawer");
+      }
     }
     // To do: Send back userID to users. 
     return;
@@ -127,34 +136,36 @@ function sendWord(gameID){
 /*
 Starts (end later ends) the game timer for a specific game.
 */
-function startTimer(gameID){
-  var users = games[gameID].players;
-  var game = games[gameID];
-  var numPlayers = game.players.length;
-  for (var i = 0; i < games[gameID].players.length; i++){
-    io.to(games[gameID].players[i].userSocketID).emit("startTimer");
-  }
-  console.log("Started Timer, sent word to " + colors.red(game.players[game.drawer % numPlayers].username));
-  sendWord(gameID);
-  wordListener = true; // We are now actively listening for the word. 
-  //io.sockets.in(gameID).emit("ping"); // Head count
-
-  setTimeout(function() {
-    console.log("Timer is over");
-    if (wordListener){ // We have to check in case someone gets it right before the timer ends
-      for (var i = 0; i < games[gameID].players.length; i++){
-        io.to(games[gameID].players[i].userSocketID).emit("endTimer");
-      }
-      wordListener = false;
-      games[gameID].drawer++;
-      games[gameID].wordCounter++;
-      return;
+function startGame(gameID){
+  //console.log(gameID);
+  checkGame(gameID); // Consolidate user list
+  setTimeout(function(){ // Don't do anything until (1 s after) checkGame is done
+    var users = games[gameID].players;
+    var game = games[gameID];
+    var numPlayers = game.players.length;
+    for (var i = 0; i < numPlayers; i++){
+      io.to(games[gameID].players[i].userSocketID).emit("startTimer", TIMER);
     }
-  }, TIMER);
-  // Anything you put down here won't wait until after the three seconds. 
+    console.log("Started Timer, sent word to " + colors.red(game.players[game.drawer % numPlayers].username));
+    sendWord(gameID);
+    games[gameID].wordListener = true; // We are now actively listening for the word. 
+    //IO.sockets.in(gameID).emit("ping"); // Head count
+    setTimeout(function() {
+      // Anything in here happens at end game
+      if (games[gameID].wordListener){ // We have to check in case someone gets it right before the timer ends
+        console.log("Game is over");
+        for (var i = 0; i < games[gameID].players.length; i++){
+          io.to(games[gameID].players[i].userSocketID).emit("endGame");
+        }
+        games[gameID].wordListener = false;
+        games[gameID].drawer++;
+        games[gameID].wordCounter++;
+        checkGame(gameID);
+        return;
+      }
+    }, TIMER);
+  }, TIME_DELAY+1000);
 }
-
-
 
 // Set the static file path to the public directory
 router.use(express.static(path.resolve(__dirname, "public")));
@@ -187,7 +198,7 @@ io.sockets.on("connection", function(socket) {
   socket.on("pingrec", function(userInfo){
     //console.log("numUsers = " + numUsers);
     console.log("User pinged with ID " + userInfo.userID);
-    if (listening && games[userInfo.gameID].players[userInfo.userID]){
+    if (games[userInfo.gameID].listening && games[userInfo.gameID].players[userInfo.userID]){
       games[userInfo.gameID].players[userInfo.userID].inGame = true; // We still have this user
     }
   });
@@ -201,18 +212,28 @@ io.sockets.on("connection", function(socket) {
 
   // When someone sends a message emit it to the correct game
   socket.on("sendMessage", function(data) {
+    var gameID = data.game;
     //console.log("sending message..."  + data.game);
     io.sockets.in(data.game).emit("message", data);
     //checkGame(socket, 0);
-    if (wordListener) {
-      if(data.text == words[games[data.game].wordCounter % words.length]){
-        console.log(colors.blue("Someone got it right"));
-        wordListener = false;
+    if (games[data.game].wordListener) {
+      if(data.text == words[games[data.game].wordCounter % words.length] && 
+        data.userID !== games[data.game].drawer % games[data.game].players.length){
+        console.log(colors.blue(data.name + " got it right"));
+        for (var i = 0; i < games[gameID].players.length; i++){
+          io.to(games[gameID].players[i].userSocketID).emit("endGame");
+        }
+        games[data.game].wordListener = false;
+        games[gameID].drawer++;
+        games[gameID].wordCounter++;
+        checkGame(gameID);
       }
     }
-    else {
-      startTimer(0);
-    }
+  });
+
+  socket.on("startGame", function(gameID){
+    startGame(gameID);
+    console.log("STARTED THE FUCKING GAME")
   });
 
   //Clears the drawing screen in the game that called clear screen

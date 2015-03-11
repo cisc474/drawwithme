@@ -21,9 +21,9 @@ var scroll = function() {
 // Connect to the server using socket.io
 var socket = io.connect();
 
-// User Props module to be able to pass aroudn user info 
+// User Props module to be able to pass around user info 
 app.service("userProps", function() {
-  var user = { gameID: "", name: "", userID: -1 };
+  var user = { gameID: "", name: "", userID: -1, isDrawer: false };
   return {
     getUser: function() {
       return user;
@@ -36,6 +36,9 @@ app.service("userProps", function() {
     },
     setUserID: function(value) {
       user.userID = value;
+    },
+    setIsDrawer: function(value) {
+      user.isDrawer = value;
     }
   };
 });
@@ -59,6 +62,7 @@ app.controller("HomeController", ["$scope", "$location", "userProps",
       userProps.setUserID(userInfo.userID);
       //console.log(userInfo.gameID);
       console.log("Users position is " + userInfo.userID);
+      console.log("My current gameID is " + userProps.getUser().gameID);
       $location.path(path);
       $scope.$apply();
     });
@@ -80,16 +84,14 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
     } 
     console.log(userProps.getUser());
     startDraw(userProps.getUser().gameID);
-    startTimer();
+    //startTimer();
     removeDrawer();
-    if(userProps.getUser().name == "jeremy") {
+    if(userProps.getUser().isDrawer) {
       makeDrawer();
     }
-    // TODO: upon load check to see if they have a name and if they are in the 
-    // correct room
 
     // get the gameID and tell socket that you joined it
-    userProps.getUser().gameID = $routeParams.id;
+    //userProps.getUser().gameID = $routeParams.id;
 
     socket.emit("joingame", userProps.getUser().gameID);
 
@@ -105,6 +107,20 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
       $scope.$apply();
     });
 
+    socket.on("makeDrawer", function() {
+      console.log("Server says I'm the drawer");
+      console.log("Currently my gameID is " + userProps.getUser().gameID);
+      userProps.getUser().isDrawer = true;
+      makeDrawer();
+    });
+
+    socket.on("removeDrawer", function() {
+      console.log("Server says I'm not the drawer :(");
+      //console.log("Currently my gameID is " + userProps.getUser().gameID);
+      userProps.getUser().isDrawer = false;
+      removeDrawer();
+    });
+
     socket.on("clearTheScreen", function(data){
       console.log(data.name + " cleared the screen");
       stage.clear();
@@ -115,11 +131,12 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
       console.log("Assigned new ID of " + newID);
     });
 
-    socket.on("startTimer", function(){
+    socket.on("startTimer", function(time){
       console.log("Server started timer");
+      startTimer(time);
     });
 
-    socket.on("endTimer", function(){
+    socket.on("endGame", function(){
       console.log("Server ended timer");
     });
 
@@ -148,7 +165,8 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
       message = $scope.text;
       $scope.text = "";
       //console.log("sending message... " + message +", " + userProps.getUser().name + ", " + userProps.getUser().gameID); 
-      socket.emit("sendMessage", {name: userProps.getUser().name, text: message, game: userProps.getUser().gameID});
+      socket.emit("sendMessage", {name: userProps.getUser().name, text: message, game: userProps.getUser().gameID, 
+        userID: userProps.getUser().userID});
     };
 
     // Code for clearing the screen
@@ -166,5 +184,16 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
       //socket.emit("clearScreen", {name: userProps.getUser().name, game: userProps.getUser().gameID});
     };
 
+    // Code for clearing the screen
+    $scope.startGame = function() {
+      console.log("Clicked the start game button");
+      console.log("My game ID is " + userProps.getUser().gameID);
+      if (userProps.getUser().isDrawer){
+        socket.emit("startGame", userProps.getUser().gameID);
+      }
+      //going to have to emit the new color for the server to push out, to prevent any user from changing the color (only drawer should change)
+      //also maybe have local user's color?
+      //socket.emit("clearScreen", {name: userProps.getUser().name, game: userProps.getUser().gameID});
+    };
   }
 ]);

@@ -27,3 +27,8 @@ canvas {
 	-moz-border-radius: 2px;
 	border-radius: 2px;
 }
+
+.center-block.btn.btn-lg{
+  float: none;
+  margin-left: auto;
+}
