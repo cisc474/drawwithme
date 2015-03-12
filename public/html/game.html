@@ -5,6 +5,30 @@
   <!-- create the canvas upon which people will draw -->
   <div class="row center">
     <canvas id="gameCanvas" width="960" height="400"></canvas>
+
+    <!-- Drawing Toolbar-->
+    <div class="container drawToolBox">
+      <!-- Single button -->
+      <div class="btn-group dropup">
+        <button type="button" class="btn btn-lg btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+          <span class="glyphicon glyphicon-pencil"></span> Color<span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+          <li ng-click="changeDrawColor(&quot;#ff0000&quot;)"><a>Red</a></li>
+          <li ng-click="changeDrawColor(&quot;#00ff00&quot;)"><a>Green</a></li>
+          <li ng-click="changeDrawColor(&quot;#0000ff&quot;)"><a>Blue</a></li>
+          <li ng-click="changeDrawColor(&quot;#000000&quot;)"><a>Black</a></li>
+          <li class="divider"></li>
+          <li ng-click="changeDrawColor(&quot;#ffffff&quot;)"><a>White</a></li>
+        </ul>
+      </div>
+      <!-- Clear Screen button -->
+      <span class="btn-group pull-right">
+          <button class="btn btn-primary btn-lg" ng-click="clearScreen()">Clear screen</button>
+      </span>
+    </div>
+    <!-- End Drawing Toolbar -->
+
   </div>
   <hr>
   <!-- Show all messages, currently in ugly table format just to make sure things
@@ -43,27 +67,7 @@
     </form>
   </div>
 
-  <!-- Button to clear the screen -->
-  <div class="row">
-
-  <!-- Single button -->
-  <div class="btn-group dropup">
-    <button type="button" class="btn btn-lg btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-      Color <span class="caret"></span>
-    </button>
-    <ul class="dropdown-menu" role="menu">
-      <li ng-click="changeDrawColor(&quot;#ff0000&quot;)"><a>Red</a></li>
-      <li ng-click="changeDrawColor(&quot;#00ff00&quot;)"><a>Green</a></li>
-      <li ng-click="changeDrawColor(&quot;#0000ff&quot;)"><a>Blue</a></li>
-      <li ng-click="changeDrawColor(&quot;#000000&quot;)"><a>Black</a></li>
-      <li class="divider"></li>
-      <li><a href="#">Separated link</a></li>
-    </ul>
-  </div>
-
-    <span class="btn-group pull-right">
-        <button class="btn btn-primary btn-lg" ng-click="clearScreen()">Clear screen</button>
-    </span>
-  </div>
+  <!-- Drawing Toolbar-->
+  <!-- End Drawing Toolbar -->
 
 </div>
