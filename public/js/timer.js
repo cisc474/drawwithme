@@ -1,4 +1,3 @@
-var timerDuration = 30000// 5 min = 300000;
 var timeRemaining;
 var timer;
 var min;
@@ -8,7 +7,7 @@ var timerString;
 // Connect to the server using socket.io
 var socket = io.connect();
 
-var startTimer = function() {
+var startTimer = function(timerDuration) {
   
   timeRemaining = timerDuration;
   timer = $("#gameTimer").get(0);
@@ -21,7 +20,7 @@ var startTimer = function() {
       
     }
     timeRemaining = timeRemaining - 1000;
-    socket.emit("timer", { timeRemaining: timeRemaining });
+    //socket.emit("timer", { timeRemaining: timeRemaining });
 //    console.log("insideinterval");
 
     min = (timeRemaining/1000/60) << 0;
