@@ -4,7 +4,7 @@ var oldPt;
 var oldMidPt;
 var title;
 var color = "#000000";
-var stroke;
+var stroke = 15;
 var colors;
 var index;
 var gameID;
@@ -14,7 +14,7 @@ var startDraw = function(game) {
   console.log("Hello from draw!");
   canvas = $("#gameCanvas").get(0);
   index = 0;
-//  colors = ["#000000"];
+  // colors = ["#000000"];
   //check to see if we are running in a browser with touch support
   stage = new createjs.Stage(canvas);
   stage.autoClear = false;
@@ -26,7 +26,7 @@ var startDraw = function(game) {
   stage.addEventListener("stagemouseup", handleMouseUp);
   title = new createjs.Text("Click and Drag to draw", "36px Arial", "#777777");
   title.x = 300;
-  title.y = 200;
+  title.y = 150;//200
   stage.addChild(title);
   stage.addChild(drawingCanvas);
   stage.update();
@@ -38,8 +38,9 @@ var handleMouseDown = function(event) {
     stage.clear();
     stage.removeChild(title);
   }
-//  color = colors[(index++) % colors.length];
-  stroke = 15;//Math.random() * 30 + 10 | 0;
+  //These (color, stroke) are handled by buttons in game now
+  // color = colors[(index++) % colors.length];
+  //stroke = 15;//Math.random() * 30 + 10 | 0;
   oldPt = new createjs.Point(stage.mouseX, stage.mouseY);
   oldMidPt = oldPt.clone();
   stage.addEventListener("stagemousemove", handleMouseMove);

@@ -4,6 +4,7 @@ canvas {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
+  cursor: crosshair;
 }
 
 .center {
@@ -31,4 +32,27 @@ canvas {
 .center-block.btn.btn-lg{
   float: none;
   margin-left: auto;
+}
+
+.gameArea{
+  border: 2px solid;
+}
+
+.gameButton {
+  width: 130px;
+}
+.gameButtons > div {
+  float:left;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.gameDrawArea{
+  float:right;
+  display: inline-block;
+  border-left: 2px solid;
+}
+
+#gameTimer{
+  font-size: 32px;
 }

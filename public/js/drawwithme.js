@@ -175,10 +175,19 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
       socket.emit("clearScreen", {name: userProps.getUser().name, game: userProps.getUser().gameID});
     };
 
-    // Code for clearing the screen
+    // Code for changing draw color
     $scope.changeDrawColor = function(newColor) {
       console.log("color changed to: " + newColor);
       color = newColor;
+      //going to have to emit the new color for the server to push out, to prevent any user from changing the color (only drawer should change)
+      //also maybe have local user's color?
+      //socket.emit("clearScreen", {name: userProps.getUser().name, game: userProps.getUser().gameID});
+    };
+
+    // Code for changing draw size
+    $scope.changeDrawSize = function(newStroke) {
+      console.log("size changed to: " + newStroke);
+      stroke = newStroke;
       //going to have to emit the new color for the server to push out, to prevent any user from changing the color (only drawer should change)
       //also maybe have local user's color?
       //socket.emit("clearScreen", {name: userProps.getUser().name, game: userProps.getUser().gameID});
