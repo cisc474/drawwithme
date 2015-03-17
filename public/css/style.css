@@ -56,3 +56,7 @@ canvas {
 #gameTimer{
   font-size: 32px;
 }
+
+#nameInput{
+  width: 150px;
+}
