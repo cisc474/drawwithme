@@ -2,7 +2,7 @@
 var app = angular.module("drawwithme", ["ngRoute"]);
 
 // Setup the routes used for the singlepage app
-app.config(["$routeProvider", "$locationProvider", 
+app.config(["$routeProvider", "$locationProvider",
   function($routeProvider, $locationProvider) {
     $routeProvider.when("/game/:id", {
       templateUrl: "/html/game.html",
@@ -21,7 +21,7 @@ var scroll = function() {
 // Connect to the server using socket.io
 var socket = io.connect();
 
-// User Props module to be able to pass around user info 
+// User Props module to be able to pass around user info
 app.service("userProps", function() {
   var user = { gameID: "", name: "", userID: -1, isDrawer: false };
   return {
@@ -70,7 +70,7 @@ app.controller("HomeController", ["$scope", "$location", "userProps",
 ]);
 
 // This controller controls the game view
-app.controller("GameController", ["$scope", "$routeParams", "$location", "userProps", 
+app.controller("GameController", ["$scope", "$routeParams", "$location", "userProps",
   function($scope, $routeParams, $location, userProps) {
     var path = "/home";
     socket.emit("check", userProps.getUser());
@@ -81,7 +81,7 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
       $location.path(path);
       //$scope.$apply();
       return;
-    } 
+    }
     console.log(userProps.getUser());
     startDraw(userProps.getUser().gameID);
     //startTimer();
@@ -138,6 +138,7 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
 
     socket.on("endGame", function(){
       console.log("Server ended timer");
+      killTimer();
     });
 
     socket.on("word", function(word){
@@ -164,8 +165,8 @@ app.controller("GameController", ["$scope", "$routeParams", "$location", "userPr
     $scope.sendMessage = function() {
       message = $scope.text;
       $scope.text = "";
-      //console.log("sending message... " + message +", " + userProps.getUser().name + ", " + userProps.getUser().gameID); 
-      socket.emit("sendMessage", {name: userProps.getUser().name, text: message, game: userProps.getUser().gameID, 
+      //console.log("sending message... " + message +", " + userProps.getUser().name + ", " + userProps.getUser().gameID);
+      socket.emit("sendMessage", {name: userProps.getUser().name, text: message, game: userProps.getUser().gameID,
         userID: userProps.getUser().userID});
     };
 

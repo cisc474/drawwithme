@@ -6,6 +6,14 @@ var timerString;
 
 // Connect to the server using socket.io
 var socket = io.connect();
+var intervalHandle = null;
+
+// DONT CALL THIS BEFORE START TIMER. SERIOUSLY.
+var killTimer = function(){
+  if (intervalHandle){
+    clearInterval(intervalHandle);
+  }
+}
 
 var startTimer = function(timerDuration) {
   
@@ -13,11 +21,10 @@ var startTimer = function(timerDuration) {
   timer = $("#gameTimer").get(0);
   //console.log(timer);
 
-  setInterval(function() {  
+  intervalHandle = setInterval(function() {
 
     if(timeRemaining < 0){
       //do code here when the game timer ends
-      
     }
     timeRemaining = timeRemaining - 1000;
     //socket.emit("timer", { timeRemaining: timeRemaining });
@@ -37,7 +44,7 @@ var startTimer = function(timerDuration) {
   }, 1000);// 1000 means it runs every second
 
   //not working yet
-  socket.on('connection', function (socket) {  
+  socket.on('connection', function (socket) {
     socket.on('reset', function (data) {
       timeRemaining = timerDuration;
       socket.emit('timer', { game: data.game, timerRemaining: timerRemaining });
